@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.soldier.modules.business.dao.ProjectCreateDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.soldier.modules.business.entity.ProjectCreateEntity" id="projectCreateMap">
+        <result property="pcId" column="pc_id"/>
+        <result property="name" column="name"/>
+        <result property="number" column="number"/>
+        <result property="type" column="type"/>
+        <result property="category" column="category"/>
+        <result property="level" column="level"/>
+        <result property="money" column="money"/>
+        <result property="isFinish" column="is_finish"/>
+        <result property="createTime" column="create_time"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="creationTime" column="creation_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!--查询记录数-->
+    <select id="queryCountPage" resultType="Integer" parameterType="map">
+        select count(DISTINCT a.pc_id) from tb_project_create a
+        inner join tb_teacher_of_proc b on b.pc_id = a.pc_id
+
+        <!--二级学院管理员查询本学院的-->
+        <if test="deptId != null and deptId != ''">
+            inner join tb_teacher_of_dept c on b.tea_id = c.tea_id
+            and c.dept_id = #{deptId}
+        </if>
+
+        where 1 = 1
+
+        <!--根据项目名称查询-->
+        <if test="key != null and key != ''">
+            and a.name like CONCAT('%',#{key},'%')
+        </if>
+
+        <!--教师查询自己的-->
+        <if test="teaId != null and teaId != ''">
+            and b.tea_id = #{teaId}
+        </if>
+
+        <!--立项时间:年度-->
+        <if test="checkTime != null and checkTime != ''">
+            and a.create_time like CONCAT('%',#{checkTime},'%')
+        </if>
+
+        <!--项目类型-->
+        <if test="type != null and type != ''">
+            and a.type = #{type}
+        </if>
+
+        <!--项目类别-->
+        <if test="category != null and category != ''">
+            and a.category = #{category}
+        </if>
+
+        <!--项目级别-->
+        <if test="level != null and level != ''">
+            and a.level = #{level}
+        </if>
+
+        <!--类型:1-主持人 2-成员-->
+        <if test="personType != null and personType != ''">
+            and b.type = #{personType}
+        </if>
+
+    </select>
+
+    <!--分页查询-->
+    <select id="queryPage" parameterType="map" resultType="com.soldier.modules.business.entity.ProjectCreateEntity">
+        select a.*
+        <!--用于查看教师详情-->
+        <if test="startIndex == null || pageSize == null">
+            ,b.type as teacherType
+        </if>
+        from tb_project_create a
+        inner join tb_teacher_of_proc b on b.pc_id = a.pc_id
+
+        <!--二级学院管理员查询本学院的-->
+        <if test="deptId != null and deptId != ''">
+            inner join tb_teacher_of_dept c on b.tea_id = c.tea_id
+            and c.dept_id = #{deptId}
+        </if>
+
+        where 1 = 1
+
+        <!--根据项目名称查询-->
+        <if test="key != null and key != ''">
+            and a.name like CONCAT('%',#{key},'%')
+        </if>
+
+        <!--教师查询自己的-->
+        <if test="teaId != null and teaId != ''">
+            and b.tea_id = #{teaId}
+        </if>
+
+        <!--立项时间:年度-->
+        <if test="checkTime != null and checkTime != ''">
+            and a.create_time like CONCAT('%',#{checkTime},'%')
+        </if>
+
+        <!--项目类型-->
+        <if test="type != null and type != ''">
+            and a.type = #{type}
+        </if>
+
+        <!--项目类别-->
+        <if test="category != null and category != ''">
+            and a.category = #{category}
+        </if>
+
+        <!--项目级别-->
+        <if test="level != null and level != ''">
+            and a.level = #{level}
+        </if>
+
+        <!--类型:1-主持人 2-成员-->
+        <if test="personType != null and personType != ''">
+            and b.type = #{personType}
+        </if>
+
+        <if test="startIndex != null and pageSize != null">
+            GROUP BY a.pc_id
+            limit #{startIndex}, #{pageSize}
+        </if>
+
+    </select>
+
+    <!-- 教师以负责人或成员的身份查询未结题项目 -->
+    <select id="queryMyProject" parameterType="long" resultType="com.soldier.modules.business.entity.ProjectCreateEntity">
+        select a.pc_id, a.name from tb_project_create a
+        inner join tb_teacher_of_proc b on b.pc_id = a.pc_id
+        inner join tb_teacher_info c on c.teacher_id = b.tea_id
+        where c.user_id = #{userId}
+        and a.is_finish = 0
+        GROUP BY a.pc_id
+    </select>
+</mapper>

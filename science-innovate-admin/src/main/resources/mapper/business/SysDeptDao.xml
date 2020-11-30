@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.soldier.modules.business.dao.SysDeptDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.soldier.modules.business.entity.SysDeptEntity" id="sysDeptMap">
+        <result property="deptId" column="dept_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="personId" column="person_id"/>
+        <result property="name" column="name"/>
+        <result property="phone" column="phone"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+    <!--根据用户id查询教师所属二级学院-->
+    <select id="queryCollegeByUserId" resultType="com.soldier.modules.business.entity.SysDeptEntity">
+        select a.* from sys_dept a
+        inner join tb_teacher_of_dept b on b.dept_id = a.dept_id
+        inner join tb_teacher_info c on b.tea_id = c.teacher_id
+        where c.user_id = #{userId}
+        and a.type = 0
+    </select>
+
+    <!--根据用户id查询教师所属二级学院-->
+    <select id="queryCollegeIdByUserId" resultType="java.lang.Long">
+        select a.dept_id from sys_dept a
+        inner join tb_teacher_of_dept b on b.dept_id = a.dept_id
+        inner join tb_teacher_info c on b.tea_id = c.teacher_id
+        where c.user_id = #{userId}
+        and a.type = 0
+    </select>
+
+    <!--查询子部门数-->
+    <select id="queryNumByParent" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        select 1 from sys_dept
+        where parent_id = #{parentId} limit 1;
+    </select>
+
+</mapper>

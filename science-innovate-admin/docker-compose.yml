@@ -1,0 +1,13 @@
+version: '2'
+services:
+  science-innovate-admin:
+    image: registry.cn-hangzhou.aliyuncs.com/soldier-hub/science-innovate-admin
+    ports:
+      # 8003为服务器内部 docker外部运行端口
+      # 8080必须与Dockerfile的一致，为服务器内部运行端口
+      - "8003:8080"
+    environment:
+      - spring.profiles.active=prod
+    # 映射文件路径
+    volumes:
+      - /root/science-innovate-admin/:/root/science-innovate-admin/

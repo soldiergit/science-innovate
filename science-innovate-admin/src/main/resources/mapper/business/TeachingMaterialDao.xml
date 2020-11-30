@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.soldier.modules.business.dao.TeachingMaterialDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.soldier.modules.business.entity.TeachingMaterialEntity" id="teachingMaterialMap">
+        <result property="materialId" column="material_id"/>
+        <result property="name" column="name"/>
+        <result property="press" column="press"/>
+        <result property="publishTime" column="publish_time"/>
+        <result property="remarks" column="remarks"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!--查询记录数-->
+    <select id="queryCountPage" resultType="Integer" parameterType="map">
+        select count(DISTINCT a.material_id) from tb_teaching_material a
+        inner join tb_teacher_of_tm b on b.tm_id = a.material_id
+
+        <!--二级学院管理员查询本学院的-->
+        <if test="deptId != null and deptId != ''">
+            inner join tb_teacher_of_dept c on b.tea_id = c.tea_id
+            and c.dept_id = #{deptId}
+        </if>
+
+        where 1 = 1
+
+        <!--根据项目名称查询-->
+        <if test="key != null and key != ''">
+            and a.name like CONCAT('%',#{key},'%')
+        </if>
+
+        <!--教师查询自己的-->
+        <if test="teaId != null and teaId != ''">
+            and b.tea_id = #{teaId}
+        </if>
+
+        <!--出版时间:年度-->
+        <if test="checkTime != null and checkTime != ''">
+            and a.publish_time like CONCAT('%',#{checkTime},'%')
+        </if>
+
+        <!--类型:1-主持人 2-成员-->
+        <if test="personType != null and personType != ''">
+            and b.type = #{personType}
+        </if>
+
+    </select>
+
+    <!--分页查询-->
+    <select id="queryPage" parameterType="map" resultType="com.soldier.modules.business.entity.TeachingMaterialEntity">
+        select a.*
+        <!--用于查看教师详情-->
+        <if test="startIndex == null || pageSize == null">
+            ,b.type
+        </if>
+        from tb_teaching_material a
+        inner join tb_teacher_of_tm b on b.tm_id = a.material_id
+
+        <!--二级学院管理员查询本学院的-->
+        <if test="deptId != null and deptId != ''">
+            inner join tb_teacher_of_dept c on b.tea_id = c.tea_id
+            and c.dept_id = #{deptId}
+        </if>
+
+        where 1 = 1
+
+        <!--根据项目名称查询-->
+        <if test="key != null and key != ''">
+            and a.name like CONCAT('%',#{key},'%')
+        </if>
+
+        <!--教师查询自己的-->
+        <if test="teaId != null and teaId != ''">
+            and b.tea_id = #{teaId}
+        </if>
+
+        <!--出版时间:年度-->
+        <if test="checkTime != null and checkTime != ''">
+            and a.publish_time like CONCAT('%',#{checkTime},'%')
+        </if>
+
+        <!--类型:1-主持人 2-成员-->
+        <if test="personType != null and personType != ''">
+            and b.type = #{personType}
+        </if>
+
+        <if test="startIndex != null and pageSize != null">
+            GROUP BY a.material_id
+            limit #{startIndex}, #{pageSize}
+        </if>
+
+    </select>
+</mapper>

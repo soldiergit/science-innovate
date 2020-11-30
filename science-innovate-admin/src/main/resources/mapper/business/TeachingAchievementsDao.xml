@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.soldier.modules.business.dao.TeachingAchievementsDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.soldier.modules.business.entity.TeachingAchievementsEntity" id="teachingAchievementsMap">
+        <result property="taId" column="ta_id"/>
+        <result property="name" column="name"/>
+        <result property="awardTime" column="award_time"/>
+        <result property="grade" column="grade"/>
+        <result property="rank" column="rank"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!--查询记录数-->
+    <select id="queryCountPage" resultType="Integer" parameterType="map">
+        select count(DISTINCT a.ta_id) from tb_teaching_achievements a
+        inner join tb_teacher_of_ta b on b.ta_id = a.ta_id
+
+        <!--二级学院管理员查询本学院的-->
+        <if test="deptId != null and deptId != ''">
+            inner join tb_teacher_of_dept c on b.tea_id = c.tea_id
+            and c.dept_id = #{deptId}
+        </if>
+
+        where 1 = 1
+
+        <!--根据成果名称查询-->
+        <if test="key != null and key != ''">
+            and a.name like CONCAT('%',#{key},'%')
+        </if>
+
+        <!--教师查询自己的-->
+        <if test="teaId != null and teaId != ''">
+            and b.tea_id = #{teaId}
+        </if>
+
+        <!--获奖时间:年度-->
+        <if test="checkTime != null and checkTime != ''">
+            and a.award_time like CONCAT('%',#{checkTime},'%')
+        </if>
+
+        <!--获奖级别-->
+        <if test="grade != null and grade != ''">
+            and a.grade = #{grade}
+        </if>
+
+        <!--获奖等次-->
+        <if test="rank != null and rank != ''">
+            and a.rank = #{rank}
+        </if>
+
+        <!--类型:1-主持人 2-成员-->
+        <if test="personType != null and personType != ''">
+            and b.type = #{personType}
+        </if>
+
+    </select>
+
+    <!--分页查询-->
+    <select id="queryPage" parameterType="map" resultType="com.soldier.modules.business.entity.TeachingAchievementsEntity">
+        select a.*
+        <!--用于查看教师详情-->
+        <if test="startIndex == null || pageSize == null">
+            ,b.type
+        </if>
+        from tb_teaching_achievements a
+        inner join tb_teacher_of_ta b on b.ta_id = a.ta_id
+
+        <!--二级学院管理员查询本学院的-->
+        <if test="deptId != null and deptId != ''">
+            inner join tb_teacher_of_dept c on b.tea_id = c.tea_id
+            and c.dept_id = #{deptId}
+        </if>
+
+        where 1 = 1
+
+        <!--根据成果名称查询-->
+        <if test="key != null and key != ''">
+            and a.name like CONCAT('%',#{key},'%')
+        </if>
+
+        <!--教师查询自己的-->
+        <if test="teaId != null and teaId != ''">
+            and b.tea_id = #{teaId}
+        </if>
+
+        <!--获奖时间:年度-->
+        <if test="checkTime != null and checkTime != ''">
+            and a.award_time like CONCAT('%',#{checkTime},'%')
+        </if>
+
+        <!--获奖级别-->
+        <if test="grade != null and grade != ''">
+            and a.grade = #{grade}
+        </if>
+
+        <!--获奖等次-->
+        <if test="rank != null and rank != ''">
+            and a.rank = #{rank}
+        </if>
+
+        <!--类型:1-主持人 2-成员-->
+        <if test="personType != null and personType != ''">
+            and b.type = #{personType}
+        </if>
+
+        <if test="startIndex != null and pageSize != null">
+            GROUP BY a.ta_id
+            limit #{startIndex}, #{pageSize}
+        </if>
+
+    </select>
+</mapper>

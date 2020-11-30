@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.soldier.modules.business.dao.TeacherInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.soldier.modules.business.entity.TeacherInfoEntity" id="teacherInfoMap">
+        <result property="teacherId" column="teacher_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="teacherCode" column="teacher_code"/>
+        <result property="name" column="name"/>
+        <result property="sex" column="sex"/>
+        <result property="birthDay" column="birth_day"/>
+        <result property="entryTime" column="entry_time"/>
+        <result property="imgPath" column="img_path"/>
+        <result property="highEdu" column="high_edu"/>
+        <result property="firstEdu" column="first_edu"/>
+        <result property="technicalPost" column="technical_post"/>
+        <result property="administerPost" column="administer_post"/>
+        <result property="resume" column="resume"/>
+        <result property="other" column="other"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!--查询记录数-->
+    <select id="queryCountPage" resultType="Integer" parameterType="map">
+
+        select count(DISTINCT a.teacher_id) from tb_teacher_info a
+
+        <!--教师所属部门-->
+        <if test="deptId != null and deptId != ''">
+            inner join tb_teacher_of_dept b on a.teacher_id = b.tea_id
+            and b.dept_id = #{deptId}
+        </if>
+
+        where 1 = 1
+
+        <!--搜索-->
+        <if test="teacherName != null and teacherName != ''">
+            and a.name like CONCAT('%',#{teacherName},'%')
+        </if>
+
+        <!--入职时间:年度-->
+        <if test="checkTime != null and checkTime != ''">
+            and a.entry_time like CONCAT('%',#{checkTime},'%')
+        </if>
+
+    </select>
+
+    <!--分页查询-->
+    <select id="queryPage" parameterType="map" resultType="com.soldier.modules.business.entity.TeacherInfoEntity">
+
+        select a.* from tb_teacher_info a
+
+        <!--教师所属部门-->
+        <if test="deptId != null and deptId != ''">
+            inner join tb_teacher_of_dept b on a.teacher_id = b.tea_id
+            and b.dept_id = #{deptId}
+        </if>
+
+        where 1 = 1
+
+        <!--搜索-->
+        <if test="teacherName != null and teacherName != ''">
+            and a.name like CONCAT('%',#{teacherName},'%')
+        </if>
+
+        <!--入职时间:年度-->
+        <if test="checkTime != null and checkTime != ''">
+            and a.entry_time like CONCAT('%',#{checkTime},'%')
+        </if>
+
+        GROUP BY a.teacher_id
+
+        <if test="startIndex != null and pageSize != null">
+            limit #{startIndex}, #{pageSize}
+        </if>
+    </select>
+
+    <!--
+    教师业绩支撑选择教师(添加、修改负责人或者成员)，返回两个值
+        1、教师id：teacher_id
+        2、教师姓名：教师姓名-所属二级学院名称
+    -->
+    <select id="select" resultType="com.soldier.modules.business.entity.TeacherInfoEntity">
+        <!--concat 拼接列的结构-->
+        select a.teacher_id, concat(a.name, '-', c.name) as name
+        from tb_teacher_info a
+        inner join tb_teacher_of_dept b on a.teacher_id = b.tea_id
+        inner join sys_dept c on c.dept_id = b.dept_id
+        <!--部门类型必须为二级学院-->
+        where c.type = 0
+    </select>
+
+    <!--根据教师id查询用户id-->
+    <select id="queryUserIdByTeaId" resultType="java.lang.Long">
+        select user_id from tb_teacher_info where teacher_id = #{teacherId}
+    </select>
+
+    <!--根据用户id查询教师id-->
+    <select id="queryTeaIdByUserId" resultType="java.lang.Long">
+        select teacher_id from tb_teacher_info where user_id = #{userId}
+    </select>
+
+    <!--根据工号查询教师是否存在-->
+    <select id="queryNumByTeaCode" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select 1 from tb_teacher_info
+        where teacher_code = #{teacherCode} limit 1;
+    </select>
+
+    <!--根据所属二级学院及teacherIds查询列表，当stuIds为空是查询全部-->
+    <select id="queryListByDeptAndIds" resultType="com.soldier.modules.business.entity.TeacherInfoEntity">
+        select a.* from tb_teacher_info a
+
+        <!--教师所属部门-->
+        <if test="deptId != null and deptId != ''">
+            inner join tb_teacher_of_dept b on a.teacher_id = b.tea_id
+            and b.dept_id = #{deptId}
+        </if>
+
+        <!--指定教师集合-->
+        <if test="teacherIds != null and teacherIds.size() > 0">
+            where a.teacher_id in
+            <foreach item="teacherId" collection="teacherIds" open="(" close=")" separator=",">
+                #{teacherId}
+            </foreach>
+        </if>
+
+        GROUP BY a.teacher_id
+    </select>
+
+    <!--删除教师信息，以及所有教师业务档案数据-->
+    <delete id="removeTeasAndAllBusiness" parameterType="list">
+        delete aa, bb, cc, dd, ee, ff, gg, hh, jj from tb_teacher_info aa
+        <!--教师 of 部门信息-->
+        left join tb_teacher_of_dept bb on bb.tea_id = aa.teacher_id
+        <!--教师-of-论文-->
+        left join tb_teacher_of_ap cc on cc.tea_id = aa.teacher_id
+        <!--教师-of-项目立项-->
+        left join tb_teacher_of_proc dd on dd.tea_id = aa.teacher_id
+        <!--指导老师-of-学生竞赛-->
+        left join tb_teacher_of_stuc ee on ee.tea_id = aa.teacher_id
+        <!--教师-of-教学成果-->
+        left join tb_teacher_of_ta ff on ff.tea_id = aa.teacher_id
+        <!--指导老师-of-教师竞赛-->
+        left join tb_teacher_of_teac gg on gg.tea_id = aa.teacher_id
+        <!--教师-of-教学荣誉-->
+        left join tb_teacher_of_th hh on hh.tea_id = aa.teacher_id
+        <!--教师-of-教材-->
+        left join tb_teacher_of_tm jj on jj.tea_id = aa.teacher_id
+        where aa.teacher_id in
+        <foreach item="teacherId" collection="list" open="(" close=")" separator=",">
+            #{teacherId}
+        </foreach>
+	</delete>
+
+</mapper>

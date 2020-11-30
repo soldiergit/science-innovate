@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.soldier.modules.business.dao.ProjectFinishDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.soldier.modules.business.entity.ProjectFinishEntity" id="projectFinishMap">
+        <result property="pfId" column="pf_id"/>
+        <result property="pcId" column="pc_id"/>
+        <result property="teaId" column="tea_id"/>
+        <result property="finishTime" column="finish_time"/>
+        <result property="remarks" column="remarks"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <!--立项项目 association:映射一对一关系-->
+        <association property="projectCreateEntity"
+                     javaType="com.soldier.modules.business.entity.ProjectCreateEntity">
+            <id property="pcId" column="pc_id"/>
+            <result property="name" column="pname"/>
+        </association>
+        <!--结题人 association:映射一对一关系-->
+        <association property="teacherInfoEntity"
+                     javaType="com.soldier.modules.business.entity.TeacherInfoEntity">
+            <id property="teacherId" column="teacher_id"/>
+            <result property="name" column="tname"/>
+        </association>
+    </resultMap>
+    <!--详情-->
+    <resultMap type="com.soldier.modules.business.entity.ProjectFinishEntity" id="detailsMap">
+        <result property="pfId" column="pf_id"/>
+        <result property="pcId" column="pc_id"/>
+        <result property="teaId" column="tea_id"/>
+        <result property="finishTime" column="finish_time"/>
+        <result property="remarks" column="remarks"/>
+        <!--立项项目 association:映射一对一关系-->
+        <association property="projectCreateEntity"
+                     javaType="com.soldier.modules.business.entity.ProjectCreateEntity">
+            <result property="pcId" column="pc_id"/>
+            <result property="name" column="pname"/>
+            <result property="number" column="number"/>
+            <result property="type" column="type"/>
+            <result property="category" column="category"/>
+            <result property="level" column="level"/>
+            <result property="money" column="money"/>
+            <result property="createTime" column="create_time"/>
+            <result property="startTime" column="start_time"/>
+            <result property="endTime" column="end_time"/>
+        </association>
+        <!--结题人 association:映射一对一关系-->
+        <association property="teacherInfoEntity"
+                     javaType="com.soldier.modules.business.entity.TeacherInfoEntity">
+            <result property="teacherId" column="teacher_id"/>
+            <result property="teacherCode" column="teacher_code"/>
+            <result property="name" column="tname"/>
+            <result property="sex" column="sex"/>
+            <result property="birthDay" column="birth_day"/>
+            <result property="entryTime" column="entry_time"/>
+            <result property="highEdu" column="high_edu"/>
+            <result property="firstEdu" column="first_edu"/>
+            <result property="technicalPost" column="technical_post"/>
+            <result property="administerPost" column="administer_post"/>
+            <result property="resume" column="resume"/>
+            <result property="other" column="other"/>
+        </association>
+    </resultMap>
+
+    <!--查询记录数-->
+    <select id="queryCountPage" resultType="Integer" parameterType="map">
+        select count(DISTINCT a.pf_id) from tb_project_finish a
+        <!--立项项目信息-->
+        inner join tb_project_create b on a.pc_id = b.pc_id
+        <!--结题人信息-->
+        inner join tb_teacher_info c on a.tea_id = c.teacher_id
+
+        <!--二级学院管理员查询本学院的-->
+        <if test="deptId != null and deptId != ''">
+            inner join tb_teacher_of_dept d on a.tea_id = d.tea_id
+            and d.dept_id = #{deptId}
+        </if>
+
+        where 1 = 1
+
+        <!--根据项目名称、教师查询-->
+        <if test="key != null and key != ''">
+            and (b.name like CONCAT('%',#{key},'%') or c.name like CONCAT('%',#{key},'%'))
+        </if>
+
+        <!--教师查询自己的-->
+        <if test="teaId != null and teaId != ''">
+            and a.tea_id = #{teaId}
+        </if>
+
+        <!--时间:年度-->
+        <if test="checkTime != null and checkTime != ''">
+            and a.finish_time like CONCAT('%',#{checkTime},'%')
+        </if>
+    </select>
+
+    <!--分页查询-->
+    <select id="queryPage" parameterType="map" resultMap="projectFinishMap">
+        select a.*, b.name pname, c.name tname from tb_project_finish a
+        <!--立项项目信息-->
+        inner join tb_project_create b on a.pc_id = b.pc_id
+        <!--结题人信息-->
+        inner join tb_teacher_info c on a.tea_id = c.teacher_id
+
+        <!--二级学院管理员查询本学院的-->
+        <if test="deptId != null and deptId != ''">
+            inner join tb_teacher_of_dept d on a.tea_id = d.tea_id
+            and d.dept_id = #{deptId}
+        </if>
+
+        where 1 = 1
+
+        <!--根据项目名称、教师查询-->
+        <if test="key != null and key != ''">
+            and (b.name like CONCAT('%',#{key},'%') or c.name like CONCAT('%',#{key},'%'))
+        </if>
+
+        <!--教师查询自己的-->
+        <if test="teaId != null and teaId != ''">
+            and a.tea_id = #{teaId}
+        </if>
+
+        <!--时间:年度-->
+        <if test="checkTime != null and checkTime != ''">
+            and a.finish_time like CONCAT('%',#{checkTime},'%')
+        </if>
+
+        <if test="startIndex != null and pageSize != null">
+            limit #{startIndex}, #{pageSize}
+        </if>
+
+    </select>
+
+    <!--详情-->
+    <select id="details" parameterType="long" resultMap="detailsMap">
+        select
+            a.pf_id,a.pc_id,a.tea_id,a.finish_time,a.remarks,
+            b.name pname,b.number,b.type,b.category,b.level,b.money,b.create_time,b.start_time,b.end_time,
+            c.teacher_code,c.name tname,c.sex,c.birth_day,c.entry_time,c.high_edu,c.first_edu,c.technical_post,c.administer_post,c.resume,c.other
+        from tb_project_finish a
+        <!--立项项目信息-->
+        inner join tb_project_create b on a.pc_id = b.pc_id
+        <!--结题人信息-->
+        inner join tb_teacher_info c on a.tea_id = c.teacher_id
+        where a.pf_id = #{pfId}
+    </select>
+</mapper>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/science-innovate.iml" filepath="$PROJECT_DIR$/.idea/science-innovate.iml" />
+      <module fileurl="file://$PROJECT_DIR$/science-innovate-admin/science-innovate-admin.iml" filepath="$PROJECT_DIR$/science-innovate-admin/science-innovate-admin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/science-innovate-generator/science-innovate-generator.iml" filepath="$PROJECT_DIR$/science-innovate-generator/science-innovate-generator.iml" />
+    </modules>
+  </component>
+</project>

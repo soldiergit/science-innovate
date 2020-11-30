@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.soldier.modules.business.dao.TeacherOfDeptDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.soldier.modules.business.entity.TeacherOfDeptEntity" id="teacherOfDeptMap">
+        <result property="id" column="id"/>
+        <result property="teaId" column="tea_id"/>
+        <result property="deptId" column="dept_id"/>
+    </resultMap>
+
+    <!--查询已加入部门的教师-->
+    <select id="queryChoiceTeaList" resultType="com.soldier.modules.business.entity.TeacherInfoEntity">
+        select b.teacher_id, b.name
+        from tb_teacher_of_dept a
+        inner join tb_teacher_info b on b.teacher_id = a.tea_id
+        <!--部门id：有时候是二级学院的id；有时候是二级学院下的教研室/实验室id-->
+        where a.dept_id = #{deptId}
+
+        <!--是否把本人去掉-->
+        <if test="userId != null and userId != ''">
+            and b.user_id != #{userId}
+        </if>
+
+    </select>
+
+    <!--查询已加入部门的教师id-->
+    <select id="queryChoiceTeaIds" resultType="long">
+        select b.teacher_id
+        from tb_teacher_of_dept a
+        inner join tb_teacher_info b on b.teacher_id = a.tea_id
+        <!--部门id：有时候是二级学院的id；有时候是二级学院下的教研室/实验室id-->
+        where a.dept_id = #{deptId}
+
+        <!--是否把本人去掉-->
+        <if test="userId != null and userId != ''">
+            and b.user_id != #{userId}
+        </if>
+
+    </select>
+
+    <!--根据部门id删除所有教师(部门成员)与部门对应关系-->
+    <delete id="removeByDeptId">
+        delete from tb_teacher_of_dept where dept_id = #{deptId}
+    </delete>
+
+    <!--根据教师ids删除对应教师所有关系记录-->
+    <!--<delete id="removeByTeaIds" parameterType="list">-->
+        <!--delete from tb_teacher_of_dept-->
+        <!--where tea_id in-->
+        <!--<foreach item="teacherId" collection="list" open="(" close=")" separator=",">-->
+            <!--#{teacherId}-->
+        <!--</foreach>-->
+    <!--</delete>-->
+
+</mapper>

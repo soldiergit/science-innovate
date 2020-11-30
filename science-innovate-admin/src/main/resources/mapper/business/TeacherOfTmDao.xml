@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.soldier.modules.business.dao.TeacherOfTmDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.soldier.modules.business.entity.TeacherOfTmEntity" id="teacherOfTmMap">
+        <result property="totmId" column="totm_id"/>
+        <result property="teaId" column="tea_id"/>
+        <result property="tmId" column="tm_id"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+    <!--查询已加入项目成员的teacherId-->
+    <select id="queryChoiceTeaIdList" resultType="long">
+        select a.tea_id from tb_teacher_of_tm a
+        <!--项目id-->
+        where a.tm_id = #{tmId}
+        <!--作者类型必须为成员-->
+        and a.type = 2
+    </select>
+
+    <!--查询项目负责人信息-->
+    <select id="queryPersonInfo" parameterType="long" resultType="com.soldier.modules.business.entity.TeacherInfoEntity">
+        select a.* from tb_teacher_info a
+        inner join tb_teacher_of_tm b on a.teacher_id = b.tea_id
+        where b.tm_id = #{id}
+        <!--项目负责人-->
+        and b.type = 1
+    </select>
+
+    <!--查询项目成员信息-->
+    <select id="queryMemberInfo" parameterType="long" resultType="com.soldier.modules.business.entity.TeacherInfoEntity">
+        select a.* from tb_teacher_info a
+        inner join tb_teacher_of_tm b on a.teacher_id = b.tea_id
+        where b.tm_id = #{id}
+        <!--项目成员-->
+        and b.type = 2
+    </select>
+</mapper>
