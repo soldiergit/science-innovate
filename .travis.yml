@@ -1,0 +1,74 @@
+matrix:
+  include:
+    # 构建前端项目
+    - language: node_js
+      ###指定node版本
+      node_js:
+        - 10.16.1
+      ###指定github分支
+      branches:
+        only:
+          - master
+      ###进入前端项目目录
+      before_install:
+        - openssl aes-256-cbc -K $encrypted_1687bb340939_key -iv $encrypted_1687bb340939_iv  -in
+          id_rsa.enc -out ~/.ssh/id_rsa -d
+        - chmod 600 ~/.ssh/id_rsa
+        - echo -e "Host $SERVER_IP\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+        - cd science-admin-vue
+      ###指定安装脚本
+      install:
+        - npm install
+      ###指定了需要运行的测试脚本
+      script:
+        - npm run build
+        - docker build . -t "soldierdocker/science-innovate-vue:latest"
+      addons:
+        ssh_known_hosts:
+          - "$SERVER_IP"
+      ###提交镜像并登录服务器部署项目
+      after_success:
+        - docker login -u=$DOCKER_NAME -p="$DOCKER_PWD"
+        - docker push soldierdocker/science-innovate-vue:latest
+        - chmod 600 ~/.ssh/id_rsa
+        - rsync -az --delete ./docker-compose.yml root@$SERVER_IP:science-admin-vue/
+        - ssh -o "StrictHostKeyChecking no" -i id_rsa root@$SERVER_IP "cd science-admin-vue/;docker-compose
+          -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
+    # 构建前端项目
+    - language: java
+      ###指定需要的服务
+      services:
+        - docker
+      ###指定是否需要root权限
+      sudo: required
+      ###指定github分支
+      branches:
+        only:
+          - master
+      ###进入后端项目目录
+      before_install:
+        - openssl aes-256-cbc -K $encrypted_1687bb340939_key -iv $encrypted_1687bb340939_iv
+          -in id_rsa.enc -out ~/.ssh/id_rsa -d
+        - chmod 600 ~/.ssh/id_rsa
+        - echo -e "Host $SERVER_IP\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+        - cd science-innovate-admin
+      ###指定了需要运行的测试脚本
+      script:
+        - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+        - docker build . -t "soldierdocker/science-innovate-admin:latest"
+      ###提交镜像并登录服务器部署项目
+      after_success:
+        - docker login -u=$DOCKER_NAME -p="$DOCKER_PWD"
+        - docker push soldierdocker/science-innovate-admin:latest
+        - chmod 600 ~/.ssh/id_rsa
+        - rsync -az --delete ./docker-compose.yml root@$SERVER_IP:science-innovate-admin/
+        - ssh -o "StrictHostKeyChecking no" -i id_rsa root@$SERVER_IP "cd science-innovate-admin/;docker-compose
+          -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
+notifications:
+  email:
+    - 583403411@qq.com
+  on_success: change
+  on_failure: always
+before_install:
+  - openssl aes-256-cbc -K $encrypted_1687bb340939_key -iv $encrypted_1687bb340939_iv
+    -in id_rsa.enc -out ~\/.ssh/id_rsa -d

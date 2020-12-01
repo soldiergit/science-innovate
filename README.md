@@ -8,39 +8,19 @@
 >spring boot，spring mvc，mybatis，mybatis plus
 
 #### 安装教程
-
-1.idea自带数据库管理工具导入方式 创建science_innovate数据库命令：
+1. idea自带数据库管理工具导入方式 创建science_innovate数据库命令：
 ```sql
 CREATE SCHEMA science_innovate DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 ```
-2.maven引入jar包
+2. maven引入jar包
 ```text
 选择maven插件中的install 或 mvn install
 ```
-3.安装redis
-```text
-docker下拉redis镜像：
-    docker pull docker.io/redis
-启动容器：
-    docker run -d  --name redis1  -p 6379:6379  redis --requirepass "Panda15677408298"
-参数解释：
-    -d : 后台运行   -name 为容器的名字    -p 端口映射   --requirepass：redis密码    redis为镜像名
-远程连接：
-    redis-cli -h 47.112.103.217 -p 6379 -a Panda15677408298
-```
-4.运行Application
-
-#### 使用说明
-
-1. 构建镜像： `sudo mvn clean package docker:build`
-2. 部署应用： `docker run --name science-innovate-admin --privileged=true -d -p 8080:8080 -v /root/science-innovate-admin/:/home/mikey/MIKEY 90fbb84d9eb1`
-3. 推到仓库： `docker push registry.cn-hangzhou.aliyuncs.com/soldier-hub/science-innovate-admin`
-4. 拉取镜像： `docker pull registry.cn-hangzhou.aliyuncs.com/soldier-hub/science-innovate-admin`
-5. 启动服务： `docker-compose -f docker-compose.yml -d`
+3. 安装redis
+4. 运行Application
 
 #### 持续集成平台
-
->Jenkins
+>travis ci
 
 **项目结构** 
 ```

@@ -25,6 +25,5 @@ npm install file-saver xlsx --save-dev
 
 >Linux平台前端项目vue无法热更新 在启动时请使用 sudo npm run dev
 
-
 #### 持续集成平台
->Jenkins
+>travis ci

@@ -1,8 +1,10 @@
 version: '2'
 services:
   science-innovate-vue:
-    image: registry.cn-hangzhou.aliyuncs.com/soldier-hub/science-innovate-vue
+    image: soldierdocker/science-innovate-vue:latest
     ports:
       # 8004为外部访问端口
       # 80必须与default.conf的一致
       - 8004:80
+    # 开机启动
+    restart: always
