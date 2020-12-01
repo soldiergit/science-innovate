@@ -11,7 +11,7 @@ matrix:
           - master
       ###进入前端项目目录
       before_install:
-        - openssl aes-256-cbc -K $encrypted_1687bb340939_key -iv $encrypted_1687bb340939_iv  -in
+        - openssl aes-256-cbc -K $encrypted_a7dfe7f624ec_key -iv $encrypted_a7dfe7f624ec_iv  -in
           id_rsa.enc -out ~/.ssh/id_rsa -d
         - chmod 600 ~/.ssh/id_rsa
         - echo -e "Host $SERVER_IP\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
@@ -47,7 +47,7 @@ matrix:
           - master
       ###进入后端项目目录
       before_install:
-        - openssl aes-256-cbc -K $encrypted_1687bb340939_key -iv $encrypted_1687bb340939_iv
+        - openssl aes-256-cbc -K $encrypted_a7dfe7f624ec_key -iv $encrypted_a7dfe7f624ec_iv
           -in id_rsa.enc -out ~/.ssh/id_rsa -d
         - chmod 600 ~/.ssh/id_rsa
         - echo -e "Host $SERVER_IP\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
@@ -70,5 +70,5 @@ notifications:
   on_success: change
   on_failure: always
 before_install:
-  - openssl aes-256-cbc -K $encrypted_1687bb340939_key -iv $encrypted_1687bb340939_iv
+  - openssl aes-256-cbc -K $encrypted_a7dfe7f624ec_key -iv $encrypted_a7dfe7f624ec_iv
     -in id_rsa.enc -out ~\/.ssh/id_rsa -d
