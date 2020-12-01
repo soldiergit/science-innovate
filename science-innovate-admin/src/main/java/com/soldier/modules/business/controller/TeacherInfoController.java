@@ -1,6 +1,5 @@
 package com.soldier.modules.business.controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.*;
@@ -48,10 +47,6 @@ public class TeacherInfoController {
     private SysDeptService sysDeptService;
     @Autowired
     private SysDeptAdminInfoService deptAdminInfoService;
-
-    // 文件存储在容器中的绝对路径
-    @Value("${const.files-save-path}")
-    public String SAVE_FILE_PATH_NAME;
 
     /**
      * 列表
@@ -330,7 +325,7 @@ public class TeacherInfoController {
     @RequestMapping(value = "/portrait", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> getImage(@RequestParam("imgPath") String imgPath) throws Exception {
 
-        byte[] imageContent = FileUtils.fileToByte(new File(imgPath));
+        byte[] imageContent = OSSUtils.fileToByte(OSSUtils.downloadFileFromOSS(imgPath));
 
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_PNG);

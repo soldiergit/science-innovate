@@ -1,6 +1,6 @@
 package com.soldier.modules.business.service.impl;
 
-import com.alibaba.excel.util.FileUtils;
+import com.soldier.common.utils.OSSUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -84,13 +84,8 @@ public class SysAttachServiceImpl extends ServiceImpl<SysAttachDao, SysAttachEnt
         String path = null;
         for (SysAttachEntity sysAttachEntity: sysAttachEntities) {
             path = sysAttachEntity.getAttachPath();
-            file = new File(path);
+            OSSUtils.deleteFile(path);
             logger.info("删除了文件，地址为：{}", path);
-            FileUtils.delete(file);
         }
-    }
-
-    public static void main(String[] args) {
-        FileUtils.delete(new File("/home/soldier/Downloads/science-innovate-admin/34/MATCH/xfwx-xfwx.zip"));
     }
 }

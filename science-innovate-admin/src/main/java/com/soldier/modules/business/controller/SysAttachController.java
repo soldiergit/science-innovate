@@ -3,7 +3,7 @@ package com.soldier.modules.business.controller;
 import java.io.*;
 import java.util.*;
 
-import com.soldier.common.utils.FileUtils;
+import com.soldier.common.utils.OSSUtils;
 import com.soldier.modules.business.entity.TeacherInfoEntity;
 import com.soldier.modules.business.service.TeacherInfoService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -37,10 +37,6 @@ public class SysAttachController {
     @Autowired
     private TeacherInfoService teacherInfoService;
 
-    // 文件存储在容器中的绝对路径
-    @Value("${const.files-save-path}")
-    public String SAVE_FILE_PATH_NAME;
-
     /**
      * 列表
      */
@@ -51,7 +47,6 @@ public class SysAttachController {
 
         return R.ok().put("page", page);
     }
-
 
     /**
      * 信息
@@ -130,9 +125,10 @@ public class SysAttachController {
          *      ==》教学荣誉-TH；
          *      ==》赛事-MATCH；
          * 例子：
-         *  /home/soldier/Downloads/science-innovate-admin/17041-莫智懿/AP/教师logo.jpg
+         *  17041-莫智懿/AP/教师logo.jpg
          */
-        String UPLOAD_FILES_PATH = SAVE_FILE_PATH_NAME + teacherInfo.getTeacherCodeAndName() + fileType;
+        // 17041-莫智懿/AP/
+        String UPLOAD_FILES_PATH = teacherInfo.getTeacherCodeAndName() + fileType;
         if (Objects.isNull(files) || files.isEmpty()) {
             return R.error("文件为空，请重新上传");
         }
@@ -145,24 +141,15 @@ public class SysAttachController {
             String filePrefix = fileName.substring(0, fileName.lastIndexOf("."));
             // 获取文件的后缀=".jpg"
             String fileSuffix = fileName.substring(fileName.lastIndexOf("."));
-            String result = null;
-            try {
-//                result = FileUtils.upLoadUtil(UPLOAD_FILES_PATH, fileName, file);
-                result = FileUtils.upLoadUtil(UPLOAD_FILES_PATH, filePrefix, fileSuffix, file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (result == null || "".equals(result)) {
-                return R.error("文件上传失败！");
-            }
+            // 上传文件 返回真实路径
+            String fileAbsolutePath = OSSUtils.upload2OSS(file, filePrefix, fileSuffix, UPLOAD_FILES_PATH);
             sysAttachEntity = new SysAttachEntity();
-            sysAttachEntity.setAttachPath(UPLOAD_FILES_PATH + result);
-            sysAttachEntity.setAttachName(result);
+            sysAttachEntity.setAttachPath(fileAbsolutePath);
+            sysAttachEntity.setAttachName(fileName);
             sysAttachEntity.setIsDel(0);
         }
 
-        return R.ok("文件上传成功")
-                .put("sysAttachEntity", sysAttachEntity);
+        return R.ok("文件上传成功").put("sysAttachEntity", sysAttachEntity);
     }
 
     /**
@@ -184,7 +171,7 @@ public class SysAttachController {
         String teacherCode = fileName + "-";
         String teacherName = request.getParameter("name") + "/portrait/";
         // 设置新的照片文件名称为教师工号
-        String pathname = SAVE_FILE_PATH_NAME + teacherCode + teacherName + fileName + suffix;
+        String pathname = teacherCode + teacherName + fileName + suffix;
         //获取上传图片的名字
         File dest = new File(pathname);
         if(!dest.getParentFile().exists()){ //判断文件父目录是否存在
@@ -205,8 +192,8 @@ public class SysAttachController {
      */
     @PostMapping("/deleteFile")
     public R deleteFolderFiles(@RequestParam("filePath") String filePath){
-        FileUtils.deleteFile(filePath);
-        logger.info("删除了文件，地址为：{}", filePath);
+        boolean b = OSSUtils.deleteFile(filePath);
+        if (b)logger.info("删除了文件，地址为：{}", filePath);
 
         return R.ok();
     }
@@ -216,6 +203,7 @@ public class SysAttachController {
      */
     @PostMapping(value = "/download")
     public void downloadFile(final HttpServletResponse response, @RequestParam("filePath") String filePath) {
-        FileUtils.downloadUtil(response, filePath);
+        logger.info("从OSS下载文件，地址为：{}", filePath);
+        OSSUtils.downloadFileFromOSS(response, filePath);
     }
 }
