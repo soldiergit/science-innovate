@@ -80,30 +80,6 @@ public class SysLoginController extends AbstractController {
 	}
 
 	/**
-	 * 2020-11-30：实现从双创系统直接登录过来
-	 * 只需要账号即可
-	 */
-	@PostMapping("/sys/innovateLogin")
-	public Map<String, Object> innovateComeHereLogin(@RequestBody SysLoginForm form)throws IOException {
-		//用户信息
-		SysUserEntity user = sysUserService.queryByUserName(form.getUsername());
-
-		//账号不存在
-		if(user == null) {
-			return R.error("账号或密码不正确");
-		}
-
-		//账号锁定
-		if(user.getStatus() == 0){
-			return R.error("账号已被锁定,请联系管理员");
-		}
-
-		//生成token，并保存到数据库
-		R r = sysUserTokenService.createToken(user.getUserId());
-		return r;
-	}
-
-	/**
 	 * 退出
 	 */
 	@PostMapping("/sys/logout")

@@ -62,6 +62,7 @@
       }
     },
     created () {
+      this.autoLogin()
       this.getCaptcha()
     },
     methods: {
@@ -109,6 +110,23 @@
       getCaptcha () {
         this.dataForm.uuid = getUUID()
         this.captchaPath = this.$http.adornUrl(`/captcha.jpg?uuid=${this.dataForm.uuid}`)
+      },
+      // 尝试自动登录
+      autoLogin () {
+        this.loginLoading = true
+        this.$http({
+          url: this.$http.adornUrl('/innovate/getUserToken'),
+          method: 'get',
+          params: this.$http.adornParams()
+        }).then(({data}) => {
+          if (data && data.code === 0) {
+            this.loginLoading = false
+            this.$cookie.set('token', data.token)
+            this.$router.replace({name: 'home'})
+          } else {
+            this.loginLoading = false
+          }
+        })
       }
     }
   }

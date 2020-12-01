@@ -48,7 +48,8 @@ public class ShiroConfig {
         // 放行登录请求
         filterMap.put("/sys/login", "anon");
         // 放行从双创系统登录请求
-        filterMap.put("/sys/innovateLogin", "anon");
+        filterMap.put("/innovate/setUserTokenToRedis", "anon");
+        filterMap.put("/innovate/getUserToken", "anon");
         // 放行获取个人照片请求
         filterMap.put("/business/teacherinfo/portrait", "anon");
         filterMap.put("/swagger/**", "anon");

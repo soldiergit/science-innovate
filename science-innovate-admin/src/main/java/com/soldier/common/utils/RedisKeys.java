@@ -124,4 +124,11 @@ public class RedisKeys {
     public static String getBasicsDataProjectCategory() {return "science_innovate_basics_data_project_category";}
     // 项目级别集合
     public static String getBasicsDataProjectLevel() {return "science_innovate_basics_data_Data_project_level";}
+
+    /**
+     * 用户相关
+     */
+    public static String getUserToken() {
+        return "science_innovate_user_token";
+    }
 }
